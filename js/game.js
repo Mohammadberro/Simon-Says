@@ -11,3 +11,7 @@ const yellowTone = new Audio("../sounds/yellow.mp3");
 const wrongTone = new Audio("../sounds/wrong.mp3");
 const gameOverTone = new Audio("../sounds/game-over.mp3");
 const gameWinTone = new Audio("../sounds/game-win.mp3");
+
+startButton.addEventListener('click', (event) => {
+    play();
+})
