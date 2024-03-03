@@ -29,3 +29,14 @@ startButton.addEventListener('click', (event) => {
     play();
 })
 
+function makeActive(){
+    tiles.forEach((tile) => {
+        tile.classList.remove('inactive');
+    });
+}
+
+function makeInactive(){
+    tiles.forEach((tile) => {
+        tile.classList.add('inactive');
+    });
+}
