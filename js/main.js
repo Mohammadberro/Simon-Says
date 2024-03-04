@@ -10,13 +10,12 @@ const tileRed = document.getElementsByClassName("tile red");
 const tileBlue = document.getElementsByClassName("tile blue");
 const board = document.getElementsByClassName("board");
 
-
 // Variables
 let turnCount = 0;
 let sequence = [];
 let playerLevel = 0;
-let highestScore = 0;
 let clickCounter = -1;
+let Lost = false;
 
 // Audio Tunes
 const tuneBlue = new Audio("../sounds/blue.mp3");
@@ -29,28 +28,28 @@ const gameWinTone = new Audio("../sounds/game-win.wav");
 
 // Functions
 
+function loadHighScore(){
+    highScore.innerHTML = JSON.parse(localStorage.getItem("highScore"));
+}
+
 function activatePlayButton(){
-        playButton.addEventListener('click', () => {
-            if (playButton.innerText == "Restart"){
-                play();
-            }
-            else{
-            setTimeout(play, 1500);
-            }
-    })
+     playButton.addEventListener('click', () => {
+        setTimeout(play, 1000);})
 }
 
 activatePlayButton();
 
 function makeUnclickable(){
     board[0].classList.add("unclickable");
-
 }
 makeUnclickable();
 
 function makeClickable(){
     board[0].classList.remove("unclickable");
     board[0].style.cursor = 'pointer';
+    tiles.forEach((element) => {
+        element.classList.remove("unclickable");
+    });
 }
 
 function play(){
@@ -59,7 +58,6 @@ function play(){
     sequence = [];
     level.innerHTML = "0";
     makeUnclickable();
-    activateEventListener();
     createRestartButton();
     generateSequence();
     computerTurn(turnCount);
@@ -82,6 +80,7 @@ function computerTurn(turnCount){
         setTimeout(function(){
         flashTile(sequence[i]);
         },1500*i)
+        
     }
     playerTurn(turnCount);
 }
@@ -116,6 +115,7 @@ function makeInactive(){
 }
 
 function playerTurn(){
+    activateEventListener();
     clickCounter = -1;
     makeClickable();
 }
@@ -127,6 +127,10 @@ function checkSequence(choice){
             },1000)
         info.innerHTML = "You got it Right!"
         level.innerHTML = `${(clickCounter+1)}`
+        if(highScore.innerHTML < level.innerHTML){
+            highScore.innerHTML = level.innerHTML;
+            saveHighScore();
+        }
         turnCount++;
         setTimeout(function(){
         computerTurn(turnCount);
@@ -138,6 +142,7 @@ function checkSequence(choice){
         setTimeout(function(){
             gameOverTone.play();
             },1000)
+        play();
     }
 }
 
@@ -155,4 +160,8 @@ function handleTileClick(e) {
         checkSequence(choice);
         console.log(choice);
     }
+}
+
+function saveHighScore(){
+    localStorage.setItem("highScore", JSON.stringify(highScore.innerHTML));
 }
