@@ -8,12 +8,16 @@ const tileGreen = document.getElementsByClassName("tile green");
 const tileYellow = document.getElementsByClassName("tile yellow");
 const tileRed = document.getElementsByClassName("tile red");
 const tileBlue = document.getElementsByClassName("tile blue");
-const board = document.getElementsByClassName("board")
+const board = document.getElementsByClassName("board");
+
 
 // Variables
-let computerSequence = [];
-// let playerSequence = [];
+let turnCount = 0;
+let sequence = [];
+let playerSequence = [];
 let playerLevel = 0;
+let highestScore = 0;
+let clickCounter = -1;
 
 // Audio Tunes
 const tuneBlue = new Audio("../sounds/blue.mp3");
@@ -25,50 +29,41 @@ const gameOverTone = new Audio("../sounds/game-over.wav");
 const gameWinTone = new Audio("../sounds/game-win.wav");
 
 // Functions
-
-function makeUnclickable(){
-    board[0].classList.add("unclickable")
-    tiles.forEach((element) => {
-        element.classList.add("unclickable");
-        board[0].style.cursor = 'pointer';
-    });
-}
-
-makeUnclickable();
-
-function makeClickable(){
-    board[0].classList.remove("unclickable")
-    tiles.forEach((element) => {
-        element.classList.remove("unclickable");
-    });
-}
-
 function activatePlayButton(){
-    playButton.addEventListener('click', () => {
-        playerLevel=0;
-        playerSequence = [];
-        computerSequence = [];
-        if (playButton.innerText== "Restart"){
-            play();
-        }
-        else{
-        setTimeout(play, 1500);
-        }
+        playButton.addEventListener('click', () => {
+            if (playButton.innerText== "Restart"){
+                play();
+            }
+            else{
+            setTimeout(play, 1500);
+            }
     })
 }
 
 activatePlayButton();
 
-function play(){
-    playerLevel = 0;
-    createRestartButton();
-    generateComputerSequence();
-    computerTurn(playerLevel);
+function makeUnclickable(){
+    board[0].classList.add("unclickable");
+
 }
 
-function generateComputerSequence(){
+makeUnclickable();
+
+function makeClickable(){
+    board[0].classList.remove("unclickable");
+    board[0].style.cursor = 'pointer';
+}
+
+function play(){
+    createRestartButton();
+    generateSequence();
+    computerTurn(turnCount);
+    playerTurn(turnCount);
+}
+
+function generateSequence(){
     for (let i=0; i < 12 ; i++){
-        computerSequence.push(tiles[Math.floor(Math.random() * tiles.length)])
+        sequence.push(tiles[Math.floor(Math.random() * tiles.length)])
     }
 
 }
@@ -77,16 +72,15 @@ function createRestartButton(){
     playButton.innerHTML ="Restart";
 }
 
-function computerTurn(playerLevel){
-    makeUnclickable();
-    for(let i=0; i<=playerLevel; i++){
-        animateTile(computerSequence[i]);
+function computerTurn(turnCount){
+    for(let i=0; i<=turnCount; i++){
+        setTimeout(function(){
+        flashTile(sequence[i]);
+        },1000*i)
     }
-    makeClickable();
-    playerTurn();
 }
 
-function animateTile(tile){
+function flashTile(tile){
     if (tile == tileBlue[0]){
         tileBlue[0].classList.remove("inactive");
         tuneBlue.play();
@@ -115,40 +109,38 @@ function makeInactive(){
     });
 }
 
-function playerTurn(){
-    let playerSequence = [];
-    tiles.forEach((element) => {
-        element.addEventListener('click', () =>{
-            playerSequence.push(element);
-            checkAnswer(element, playerLevel);
-            console.log(playerSequence);
-        })
-    });
-}
-
-function checkAnswer(answer, level){
-    if (answer == computerSequence){
-        if ((playerSequence.length-1) == playerLevel){
-            playerLevel++;
-            level.innerText = `${playerLevel}`;
-            checkWin(playerLevel);
+function playerTurn(turnCount){
+    clickCounter = -1;
+    makeClickable();
+    tiles.forEach((element) =>{
+        element.addEventListener('click', (e) =>{
+        if (clickCounter < turnCount){
+            clickCounter++;
+            choice = (e.target);
+            checkSequence(choice);
         }
-    else{
-        play();
+        })
+    })
+}
+
+function checkSequence(choice){
+    if (choice == sequence[clickCounter] && clickCounter == turnCount){
+        info.innerHTML = "You got it Right!"
     }
+    else{
+        wrongTone.play();
+        info.innerHTML = "You Lost!"
+        setTimeout(function(){
+            gameOverTone.play();
+            },1000)
     }
 }
 
-function checkWin(playerLevel){
-    if (playerLevel >= 12){
-        info.innerHTML = "You Won!"
-    }
-    else{
-        computerTurn();
-    }
-}
+function eventListenerRemover(){
+    tiles.forEach((element) =>{
+        element.removeEventListener('click'), (e) =>{
+            playerSequence.push((e.target))
+        }
+    })
 
-// function clickHandler(){
-//     tiles.forEach((element) => {
-//         element.removeEventListener()})
-// }
+}
